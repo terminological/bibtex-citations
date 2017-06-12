@@ -1,0 +1,27 @@
+{
+  "name": "bibtex-citations",
+  "version": "1.0.0",
+  "description": "functions to help put bibtex into a html page",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terminological/npm-modules.git"
+  },
+  "keywords": [
+    "bibtex",
+    "jquery"
+  ],
+  "author": "Rob Challen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/terminological/npm-modules/issues"
+  },
+  "homepage": "https://github.com/terminological/npm-modules#readme",
+  "dependencies": {
+    "bibtex-parser": "0.0.0",
+    "jquery": "^3.2.1"
+  }
+}
