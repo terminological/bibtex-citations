@@ -1,58 +1,95 @@
 var bibtex = require('bibtex-parser');
-var $ = require('jquery');
+// var $ = require('jquery');
 
-function layoutCitation(cite) {
-	var out = cite.AUTHOR + ". "
+function layoutCitation(href, div, cite, index) {
+
+	var newCite = div.ownerDocument.createElement('cite');
+    newCite.setAttribute('id', href);
+
+	var out = "<span class='refnumber'>["+index+"]. </span>"+cite.AUTHOR + ". "
 		+ cite.YEAR + ". "
-		+ cite.TITLE +". "
+		+ cite.TITLE.substring(1,cite.TITLE.length-2) +". "
 		+"<em>"+cite.JOURNAL +"</em> "
 		+cite.VOLUME+"("+cite.NUMBER+") "
 		+cite.PAGES;
-	return out;
+
+	newCite.innerHTML = out;
+	return newCite;
 }
 
 // a jquery anchor that is a reference
-function layoutReference(anchor, index) {
-	var target = a.attr('href').substring(1);
-	
+function layoutReference(anchor, cites, indexLookup) {
+	var targets = anchor.hash.substring(1).toUpperCase().split(",");
+	if (!anchor.text.match(/^\(?[ref|cite]\)?$/)) {
+        var tmp = anchor.text + "&nbsp;[";
+    } else {
+        var tmp = "[";
+	}
+
+	var found = false
+	targets.forEach( (t,j) => {
+		if (indexLookup.has(t)) {
+            var i = indexLookup.get(t);
+            found = true;
+        } else {
+			var i="?"
+		}
+		if (j>0) { tmp+="," };
+		tmp += "<a href=#"+t+">"+i+"</a>";
+	});
+
+	tmp += "]";
+	if (found) anchor.outerHTML = tmp; //otherwise do not alter link
 }
 
+var BibtexCites = new Object();
+
 /**
- * Takes a bibtex string and a jquery style selector to populate with 
+ * Takes a bibtex string, a html node that contains the references that need citing, and a div to put the resulting citations
  */
-function BibtexCites.process(citations, selector) {
+BibtexCites.process = function(citations, referenceDiv, citationsDiv) {
 	var cites = bibtex(citations);
 	
 	// exclude bibtex entries with empty id.
 	// exclude bibtex entries that are not liked to in this document
 	
+	//console.log(cites);
+
+	var links = referenceDiv.getElementsByTagName('a');
+	var linksArray = Array.from(links);
+	var linkStrings = new Array();
+	Array.from(links).filter(a => a.hash).forEach(a => {
+		var linkString = a.hash.substring(1).toUpperCase().split(",");
+        linkStrings = linkStrings.concat(linkString);
+	});
+
 	var filteredKeys = Object
 		.keys(cites)
 		.filter(e => (e != ""))
-		.filter(e => $("a[href='#"+e+"']").length > 0);
-	
-	var sortedFilteredKeys = new Array();
-	$("a")
-		.filter(a => a.attr('href'))
-		.each(a => {
-			var target = a.attr('href').substring(1);
-			if (filteredKeys.contains(target) && !sortedFilteredKeys.contains(target)) {
-				sortedFilteredKeys.push(target); 
+		.filter(e => linkStrings.includes(e));
+
+    //console.log(filteredKeys);
+
+	var sortedFilteredKeys = new Map();
+	var i=1;
+	linkStrings
+		.forEach(a => {
+			if (filteredKeys.includes(a) && !sortedFilteredKeys.has(a)) {
+				sortedFilteredKeys.set(a,i);
+				i++;
 			}
 		});
 	
-	var i = 1;
 	sortedFilteredKeys
-		.forEach( e => {
-			//add formatted citation to list
-			$(selector).append( 
-					$( "<cite id='"+e+"'/>" )
-					.html( layoutCitation(cites[e]) )
-				);
-			//find references and replace them with formatted reference
-			$("a[href='#"+e+"']").replaceWith( layoutReference(this, i) ); //fix citation numbers not supported by css3 target-counter
-			i++;
-		});
+		.forEach( (v,k,m) => {
+            //add formatted citation to list
+            citationsDiv.appendChild(layoutCitation(k, citationsDiv, cites[k], v));
+        });
+
+	linksArray
+		.forEach( a =>
+			layoutReference( a , cites, sortedFilteredKeys)
+		);
 }
 
 module.exports = BibtexCites;

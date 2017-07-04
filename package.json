@@ -4,11 +4,11 @@
   "description": "functions to help put bibtex into a html page",
   "main": "index.js",
   "scripts": {
-    "test": "test.js"
+    "test": "node test.js | bcat"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/terminological/npm-modules.git"
+    "url": "git+https://github.com/terminological/bibtex-citations.git"
   },
   "keywords": [
     "bibtex",
@@ -17,11 +17,13 @@
   "author": "Rob Challen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/terminological/npm-modules/issues"
+    "url": "https://github.com/terminological/bibtex-citations/issues"
   },
-  "homepage": "https://github.com/terminological/npm-modules#readme",
+  "homepage": "https://github.com/terminological/bibtex-citations#readme",
   "dependencies": {
-    "bibtex-parser": "0.0.0",
-    "jquery": "^3.2.1"
+    "bibtex-parser": "0.0.0"
+  },
+  "devDependencies": {
+  	"jsdom": "^11.0.0"
   }
 }
